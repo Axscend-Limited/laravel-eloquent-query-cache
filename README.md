@@ -1,3 +1,24 @@
+> ## Axscend fork
+>
+> This is Axscend's fork of [renoki-co/laravel-eloquent-query-cache](https://github.com/renoki-co/laravel-eloquent-query-cache),
+> maintained because upstream has had no code commits since March 2025 while
+> fixes sit in open PRs.
+>
+> Installed as `axscend/laravel-eloquent-query-cache`. It `replace`s the
+> original package name and keeps the `Rennokki\QueryCache` namespace, so no
+> application code changes are needed.
+>
+> Changes against upstream `master`:
+>
+> - Explicit nullable parameter types, fixing the PHP 8.4 implicit-nullable
+>   deprecations (upstream PR [#236](https://github.com/renoki-co/laravel-eloquent-query-cache/pull/236)).
+> - Laravel 13 support in `composer.json` (the `composer.json` half of upstream
+>   PR [#243](https://github.com/renoki-co/laravel-eloquent-query-cache/pull/243);
+>   its CI workflow changes were skipped as they are invalid YAML).
+>
+> To pull in upstream changes if it is ever revived:
+> `git remote add upstream https://github.com/renoki-co/laravel-eloquent-query-cache.git && git rebase upstream/master`
+
 Laravel Eloquent Query Cache
 ============================
 
