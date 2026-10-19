@@ -2,15 +2,14 @@
 
 namespace Rennokki\QueryCache\Test;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Rennokki\QueryCache\Test\Models\Role;
 use Rennokki\QueryCache\Test\Models\User;
 
 class FlushCacheOnUpdatePivotTest extends TestCase
 {
-    /**
-     * @dataProvider strictModeContextProvider
-     */
-    public function test_belongs_to_many()
+    #[DataProvider('strictModeContextProvider')]
+    public function test_belongs_to_many(bool $strict)
     {
         $key = 'leqc:sqlitegetselect "roles".*, "role_user"."user_id" as "pivot_user_id", "role_user"."role_id" as "pivot_role_id" from "roles" inner join "role_user" on "roles"."id" = "role_user"."role_id" where "role_user"."user_id" = ? limit 1a:1:{i:0;i:1;}';
 

@@ -3,6 +3,7 @@
 namespace Rennokki\QueryCache\Test;
 
 use Illuminate\Support\Facades\Cache;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Rennokki\QueryCache\Test\Models\Book;
 use Rennokki\QueryCache\Test\Models\Kid;
 use Rennokki\QueryCache\Test\Models\Post;
@@ -10,10 +11,8 @@ use Rennokki\QueryCache\Test\Models\User;
 
 class MethodsTest extends TestCase
 {
-    /**
-     * @dataProvider strictModeContextProvider
-     */
-    public function test_do_not_cache()
+    #[DataProvider('strictModeContextProvider')]
+    public function test_do_not_cache(bool $strict)
     {
         $post = factory(Post::class)->create();
 
@@ -26,10 +25,8 @@ class MethodsTest extends TestCase
         $this->assertNull($cache);
     }
 
-    /**
-     * @dataProvider strictModeContextProvider
-     */
-    public function test_cache_prefix()
+    #[DataProvider('strictModeContextProvider')]
+    public function test_cache_prefix(bool $strict)
     {
         $post = factory(Post::class)->create();
         $storedPost = Post::cacheFor(now()->addHours(1))->cachePrefix('test')->first();
@@ -38,10 +35,8 @@ class MethodsTest extends TestCase
         $this->assertNotNull($cache);
     }
 
-    /**
-     * @dataProvider strictModeContextProvider
-     */
-    public function test_cache_tags()
+    #[DataProvider('strictModeContextProvider')]
+    public function test_cache_tags(bool $strict)
     {
         $post = factory(Post::class)->create();
         $storedPost = Post::cacheFor(now()->addHours(1))->cacheTags(['test'])->first();
@@ -58,10 +53,8 @@ class MethodsTest extends TestCase
         $this->assertNotNull($cache);
     }
 
-    /**
-     * @dataProvider strictModeContextProvider
-     */
-    public function test_cache_flush_with_the_right_tag()
+    #[DataProvider('strictModeContextProvider')]
+    public function test_cache_flush_with_the_right_tag(bool $strict)
     {
         $post = factory(Post::class)->create();
         $storedPost = Post::cacheFor(now()->addHours(1))->cacheTags(['test'])->first();
@@ -75,10 +68,8 @@ class MethodsTest extends TestCase
         $this->assertNull($cache);
     }
 
-    /**
-     * @dataProvider strictModeContextProvider
-     */
-    public function test_cache_flush_without_the_right_tag()
+    #[DataProvider('strictModeContextProvider')]
+    public function test_cache_flush_without_the_right_tag(bool $strict)
     {
         $post = factory(Post::class)->create();
         $storedPost = Post::cacheFor(now()->addHours(1))->cacheTags(['test'])->first();
@@ -98,10 +89,8 @@ class MethodsTest extends TestCase
             : $this->assertNull($cache);
     }
 
-    /**
-     * @dataProvider strictModeContextProvider
-     */
-    public function test_cache_flush_with_more_tags()
+    #[DataProvider('strictModeContextProvider')]
+    public function test_cache_flush_with_more_tags(bool $strict)
     {
         $post = factory(Post::class)->create();
         $storedPost = Post::cacheFor(now()->addHours(1))->cacheTags(['test'])->first();
@@ -119,10 +108,8 @@ class MethodsTest extends TestCase
         $this->assertNull($cache);
     }
 
-    /**
-     * @dataProvider strictModeContextProvider
-     */
-    public function test_cache_flush_with_default_tags_attached()
+    #[DataProvider('strictModeContextProvider')]
+    public function test_cache_flush_with_default_tags_attached(bool $strict)
     {
         $book = factory(Book::class)->create();
         $storedBook = Book::cacheFor(now()->addHours(1))->cacheTags(['test'])->first();
@@ -137,10 +124,8 @@ class MethodsTest extends TestCase
         $this->assertNull($cache);
     }
 
-    /**
-     * @dataProvider strictModeContextProvider
-     */
-    public function test_hashed_key()
+    #[DataProvider('strictModeContextProvider')]
+    public function test_hashed_key(bool $strict)
     {
         $kid = factory(Kid::class)->create();
         $storedKid = Kid::cacheFor(now()->addHours(1))->withPlainKey(false)->first();
@@ -149,10 +134,8 @@ class MethodsTest extends TestCase
         $this->assertNotNull($cache);
     }
 
-    /**
-     * @dataProvider strictModeContextProvider
-     */
-    public function test_append_cache_tags()
+    #[DataProvider('strictModeContextProvider')]
+    public function test_append_cache_tags(bool $strict)
     {
         $post = factory(Post::class)->create();
         $storedPost = Post::cacheFor(now()->addHours(1))->appendCacheTags(['test'])->first();
@@ -169,10 +152,8 @@ class MethodsTest extends TestCase
         $this->assertNotNull($cache);
     }
 
-    /**
-     * @dataProvider strictModeContextProvider
-     */
-    public function test_multiple_append_cache_tags()
+    #[DataProvider('strictModeContextProvider')]
+    public function test_multiple_append_cache_tags(bool $strict)
     {
         $post = factory(Post::class)->create();
         $storedPostQuery = Post::cacheFor(now()->addHours(1))->appendCacheTags(['test'])->appendCacheTags(['test2']);
@@ -180,10 +161,8 @@ class MethodsTest extends TestCase
         $this->assertEquals($storedPostQuery->getQuery()->getCacheTags(), ['test', 'test2']);
     }
 
-    /**
-     * @dataProvider strictModeContextProvider
-     */
-    public function test_append_cache_tags_with_sub_query()
+    #[DataProvider('strictModeContextProvider')]
+    public function test_append_cache_tags_with_sub_query(bool $strict)
     {
         $user = factory(User::class)->create();
 

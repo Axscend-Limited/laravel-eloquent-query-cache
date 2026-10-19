@@ -3,14 +3,13 @@
 namespace Rennokki\QueryCache\Test;
 
 use Illuminate\Support\Facades\Cache;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Rennokki\QueryCache\Test\Models\Post;
 
 class GetTest extends TestCase
 {
-    /**
-     * @dataProvider strictModeContextProvider
-     */
-    public function test_get()
+    #[DataProvider('strictModeContextProvider')]
+    public function test_get(bool $strict)
     {
         $post = factory(Post::class)->create();
         $storedPosts = Post::cacheFor(now()->addHours(1))->get();
@@ -29,10 +28,8 @@ class GetTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider strictModeContextProvider
-     */
-    public function test_get_with_columns()
+    #[DataProvider('strictModeContextProvider')]
+    public function test_get_with_columns(bool $strict)
     {
         $post = factory(Post::class)->create();
         $storedPosts = Post::cacheFor(now()->addHours(1))->get(['name']);
@@ -51,10 +48,8 @@ class GetTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider strictModeContextProvider
-     */
-    public function test_get_with_string_columns()
+    #[DataProvider('strictModeContextProvider')]
+    public function test_get_with_string_columns(bool $strict)
     {
         $post = factory(Post::class)->create();
         $storedPosts = Post::cacheFor(now()->addHours(1))->get('name');

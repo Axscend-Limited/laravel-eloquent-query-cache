@@ -3,20 +3,19 @@
 namespace Rennokki\QueryCache\Test;
 
 use Illuminate\Support\Facades\Cache;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Rennokki\QueryCache\Test\Models\Post;
 
 class PaginateTest extends TestCase
 {
-    /**
-     * @dataProvider strictModeContextProvider
-     */
-    public function test_paginate()
+    #[DataProvider('strictModeContextProvider')]
+    public function test_paginate(bool $strict)
     {
         $posts = factory(Post::class, 30)->create();
         $storedPosts = Post::cacheFor(now()->addHours(1))->paginate(15);
         $postsCount = $posts->count();
 
-        $totalCountCache = Cache::get('leqc:sqlitegetselect count(*) as aggregate from "posts"a:0:{}');
+        $totalCountCache = Cache::get('leqc:sqlitegetselect count(*) as '.$this->aggregateAlias().' from "posts"a:0:{}');
         $postsCache = Cache::get('leqc:sqlitegetselect * from "posts" limit 15 offset 0a:0:{}');
 
         $this->assertNotNull($totalCountCache);
@@ -31,16 +30,14 @@ class PaginateTest extends TestCase
         $this->assertEquals(1, $postsCache->first()->id);
     }
 
-    /**
-     * @dataProvider strictModeContextProvider
-     */
-    public function test_paginate_with_columns()
+    #[DataProvider('strictModeContextProvider')]
+    public function test_paginate_with_columns(bool $strict)
     {
         $posts = factory(Post::class, 30)->create();
         $storedPosts = Post::cacheFor(now()->addHours(1))->paginate(15, ['name']);
         $postsCount = $posts->count();
 
-        $totalCountCache = Cache::get('leqc:sqlitegetselect count(*) as aggregate from "posts"a:0:{}');
+        $totalCountCache = Cache::get('leqc:sqlitegetselect count(*) as '.$this->aggregateAlias().' from "posts"a:0:{}');
         $postsCache = Cache::get('leqc:sqlitegetselect "name" from "posts" limit 15 offset 0a:0:{}');
 
         $this->assertNotNull($totalCountCache);

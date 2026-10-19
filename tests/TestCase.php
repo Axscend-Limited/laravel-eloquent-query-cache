@@ -15,8 +15,8 @@ abstract class TestCase extends Orchestra
     {
         parent::setUp();
 
-        if ($this->getProvidedData() && method_exists(Model::class, 'preventAccessingMissingAttributes')) {
-            [$strict] = $this->getProvidedData();
+        if ($this->providedData() && method_exists(Model::class, 'preventAccessingMissingAttributes')) {
+            [$strict] = $this->providedData();
             Model::preventAccessingMissingAttributes($strict);
         }
 
@@ -54,7 +54,7 @@ abstract class TestCase extends Orchestra
         ]);
 
         $app['config']->set(
-            'cache.driver',
+            'cache.default',
             getenv('CACHE_DRIVER') ?: env('CACHE_DRIVER', 'array')
         );
 
@@ -119,6 +119,18 @@ abstract class TestCase extends Orchestra
      */
     protected function driverSupportsTags(): bool
     {
-        return ! in_array(config('cache.driver'), ['file', 'database']);
+        return ! in_array(config('cache.default'), ['file', 'database']);
+    }
+
+    /**
+     * Laravel 13 quotes the aggregate alias, which changes the cache key.
+     *
+     * @return string
+     */
+    protected function aggregateAlias(): string
+    {
+        return version_compare($this->app->version(), '13.0.0', '>=')
+            ? '"aggregate"'
+            : 'aggregate';
     }
 }

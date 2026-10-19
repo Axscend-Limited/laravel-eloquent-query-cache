@@ -3,14 +3,13 @@
 namespace Rennokki\QueryCache\Test;
 
 use Illuminate\Support\Facades\Cache;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Rennokki\QueryCache\Test\Models\Post;
 
 class SimplePaginateTest extends TestCase
 {
-    /**
-     * @dataProvider strictModeContextProvider
-     */
-    public function test_simple_paginate()
+    #[DataProvider('strictModeContextProvider')]
+    public function test_simple_paginate(bool $strict)
     {
         $posts = factory(Post::class, 30)->create();
         $storedPosts = Post::cacheFor(now()->addHours(1))->simplePaginate(15);
@@ -29,10 +28,8 @@ class SimplePaginateTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider strictModeContextProvider
-     */
-    public function test_simple_paginate_with_columns()
+    #[DataProvider('strictModeContextProvider')]
+    public function test_simple_paginate_with_columns(bool $strict)
     {
         $posts = factory(Post::class, 30)->create();
         $storedPosts = Post::cacheFor(now()->addHours(1))->simplePaginate(15, ['name']);
