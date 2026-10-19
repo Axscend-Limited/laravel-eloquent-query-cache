@@ -15,6 +15,11 @@
 > - Laravel 13 support in `composer.json` (the `composer.json` half of upstream
 >   PR [#243](https://github.com/renoki-co/laravel-eloquent-query-cache/pull/243);
 >   its CI workflow changes were skipped as they are invalid YAML).
+> - Laravel 13 boot fix: the flush observer is registered with `whenBooted()`,
+>   because Laravel 13 throws when a model is created while it boots.
+> - Requires Laravel 12.8+ or 13 (Laravel 10 and 11 dropped, since
+>   `whenBooted()` arrived in 12.8). Released as v3.8.0.
+> - Test suite runs on PHPUnit 11/12, Livewire 3 and current dev dependencies.
 >
 > To pull in upstream changes if it is ever revived:
 > `git remote add upstream https://github.com/renoki-co/laravel-eloquent-query-cache.git && git rebase upstream/master`
