@@ -99,6 +99,8 @@ class FlushCacheOnUpdateTest extends TestCase
     public function test_model_with_flush_observer_boots_and_reboots()
     {
         foreach ([1, 2] as $boot) {
+            // Listeners outlive clearBootedModels(); flush them first, as flushing boots the model.
+            Page::flushEventListeners();
             Model::clearBootedModels();
 
             factory(Page::class)->create();
