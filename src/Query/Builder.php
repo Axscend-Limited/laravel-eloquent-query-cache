@@ -24,6 +24,36 @@ class Builder extends BaseBuilder implements QueryCacheModuleInterface
     /**
      * {@inheritdoc}
      */
+    public function pluck($column, $key = null)
+    {
+        if ($this->shouldAvoidCache()) {
+            return parent::pluck($column, $key);
+        }
+
+        return $this->rememberInQueryCache(
+            $this->getCacheKey('pluck', null, serialize([$column, $key])),
+            fn () => $this->withoutQueryCache(fn () => parent::pluck($column, $key))
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function exists()
+    {
+        if ($this->shouldAvoidCache()) {
+            return parent::exists();
+        }
+
+        return $this->rememberInQueryCache(
+            $this->getCacheKey('exists'),
+            fn () => $this->withoutQueryCache(fn () => parent::exists())
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function useWritePdo()
     {
         // Do not cache when using the write pdo for query.

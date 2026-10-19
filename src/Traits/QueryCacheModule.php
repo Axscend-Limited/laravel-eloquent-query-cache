@@ -3,15 +3,17 @@
 namespace Rennokki\QueryCache\Traits;
 
 use BadMethodCallException;
-use DateTime;
+use Closure;
+use DateInterval;
+use DateTimeInterface;
 
 trait QueryCacheModule
 {
     /**
-     * The number of seconds or the DateTime instance
+     * The number of seconds, or the DateTime or DateInterval,
      * that specifies how long to cache the query.
      *
-     * @var int|\DateTime
+     * @var int|\DateTimeInterface|\DateInterval|null
      */
     protected $cacheFor;
 
@@ -75,16 +77,10 @@ trait QueryCacheModule
             $this->columns = $columns;
         }
 
-        $key = $this->getCacheKey($method);
-        $cache = $this->getCache();
-        $callback = $this->getQueryCacheCallback($method, $columns, $id);
-        $time = $this->getCacheFor();
-
-        if ($time instanceof DateTime || $time > 0) {
-            return $cache->remember($key, $time, $callback);
-        }
-
-        return $cache->rememberForever($key, $callback);
+        return $this->rememberInQueryCache(
+            $this->getCacheKey($method),
+            $this->getQueryCacheCallback($method, $columns, $id)
+        );
     }
 
     /**
@@ -98,10 +94,46 @@ trait QueryCacheModule
     public function getQueryCacheCallback(string $method = 'get', $columns = ['*'], ?string $id = null)
     {
         return function () use ($method, $columns) {
-            $this->avoidCache = true;
-
-            return $this->{$method}($columns);
+            return $this->withoutQueryCache(fn () => $this->{$method}($columns));
         };
+    }
+
+    /**
+     * Store the callback's result under the key, for the configured time.
+     *
+     * @param  string  $key
+     * @param  \Closure  $callback
+     * @return mixed
+     */
+    protected function rememberInQueryCache(string $key, Closure $callback)
+    {
+        $cache = $this->getCache();
+        $time = $this->getCacheFor();
+
+        if ($time instanceof DateTimeInterface || $time instanceof DateInterval || $time > 0) {
+            return $cache->remember($key, $time, $callback);
+        }
+
+        return $cache->rememberForever($key, $callback);
+    }
+
+    /**
+     * Run the callback against the database, then restore the cache setting,
+     * so a reused builder keeps using the cache after a miss.
+     *
+     * @param  \Closure  $callback
+     * @return mixed
+     */
+    protected function withoutQueryCache(Closure $callback)
+    {
+        $avoidCache = $this->avoidCache;
+        $this->avoidCache = true;
+
+        try {
+            return $callback();
+        } finally {
+            $this->avoidCache = $avoidCache;
+        }
     }
 
     /**
@@ -202,15 +234,16 @@ trait QueryCacheModule
     }
 
     /**
-     * Indicate that the query results should be cached.
+     * Indicate that the query results should be cached. Null or 0 turns
+     * caching off; a negative number caches forever.
      *
-     * @param  \DateTime|int|null  $time
+     * @param  \DateTimeInterface|\DateInterval|int|null  $time
      * @return \Rennokki\QueryCache\Traits\QueryCacheModule
      */
     public function cacheFor($time)
     {
         $this->cacheFor = $time;
-        $this->avoidCache = $time === null;
+        $this->avoidCache = $time === null || $time === 0;
 
         return $this;
     }
@@ -383,7 +416,7 @@ trait QueryCacheModule
     /**
      * Get the cache time attribute.
      *
-     * @return int|\DateTime
+     * @return int|\DateTimeInterface|\DateInterval|null
      */
     public function getCacheFor()
     {

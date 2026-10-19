@@ -96,6 +96,19 @@ class FlushCacheOnUpdateTest extends TestCase
         $this->assertNull($cache);
     }
 
+    public function test_flush_cache_on_create_clears_cached_pluck_and_exists()
+    {
+        factory(Page::class)->create(['name' => 'first']);
+
+        $this->assertEquals(['first'], Page::pluck('name')->all());
+        $this->assertFalse(Page::where('name', 'second')->exists());
+
+        Page::create(['name' => 'second']);
+
+        $this->assertEquals(['first', 'second'], Page::pluck('name')->all());
+        $this->assertTrue(Page::where('name', 'second')->exists());
+    }
+
     public function test_model_with_flush_observer_boots_and_reboots()
     {
         foreach ([1, 2] as $boot) {

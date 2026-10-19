@@ -31,10 +31,11 @@ There is no linter in the repo. Style is enforced by StyleCI (`.styleci.yml`, La
 - `Traits\QueryCacheable` goes on a model. It overrides `newBaseQueryBuilder()` to return `Query\Builder` instead of Laravel's base query builder, then copies the model's cache settings onto it.
 - Each setting can come from a property (`$cacheFor`, `$cacheTags`, `$cachePrefix`, `$cacheDriver`, `$cacheUsePlainKey`) or a `...Value($builder)` method. The method wins because it is applied second.
 - The builder starts with caching off (`dontCache()`). Caching only happens once `cacheFor` is set to a non-null value, on the model or per query.
-- `Query\Builder` overrides `get()` only. `first`, `count`, `paginate` and the rest all route through `get()`. `useWritePdo()` turns caching off.
+- `Query\Builder` overrides `get()`, `pluck()` and `exists()`. `first`, `value`, `count`, `paginate` and the rest route through `get()`; `doesntExist` goes through `exists()`. Laravel's `pluck()` and `exists()` skip `get()`, which is why they need their own overrides. `useWritePdo()` turns caching off.
+- `cacheFor()`: null or 0 turns caching off, a negative number (`cacheForever()` uses -1) caches forever. It accepts seconds, any `DateTimeInterface` or a `DateInterval`.
 - `Traits\QueryCacheModule` holds the cache logic: the key is `{prefix}:sha256(connection + method + SQL + bindings)`, or the plain string with `withPlainKey()`. Tags are the query tags plus the model's base tags, which default to the model class name.
 - `FlushQueryCacheObserver` is attached when a model sets `protected static $flushCacheOnUpdate = true`. It is registered in `whenBooted()`: calling `observe()` directly during boot throws on Laravel 13. It flushes the tags from `getCacheTagsToInvalidateOnUpdate()` on model events. The `belongsToMany*` / `morphToMany*` handlers only fire if the app uses `chelout/laravel-relationship-events`, which is a dev dependency here.
-- Flushing needs a driver with tags. On `file` / `database`, `flushQueryCache()` returns `false`.
+- On a store without tags (`file`, `database`, `dynamodb`), `Repository::tags()` throws, and `flushQueryCacheWithTag()` falls back to `$cache->flush()`: it wipes the **whole store**, not just query entries. This is deliberate; without it, cached results would go stale after updates.
 
 ## Tests
 

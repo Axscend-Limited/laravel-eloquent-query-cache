@@ -20,6 +20,10 @@
 > - Requires Laravel 12.8+ or 13 (Laravel 10 and 11 dropped, since
 >   `whenBooted()` arrived in 12.8). Released as v3.8.0.
 > - Test suite runs on PHPUnit 11/12, Livewire 3 and current dev dependencies.
+> - v3.9.0: `pluck()`, `exists()` and `doesntExist()` are cached (they used to
+>   always query). `cacheFor()` accepts any `DateTimeInterface` (such as
+>   `CarbonImmutable`) and `DateInterval`, and `cacheFor(0)` no longer caches
+>   forever. A builder reused after a cache miss keeps using the cache.
 >
 > To pull in upstream changes if it is ever revived:
 > `git remote add upstream https://github.com/renoki-co/laravel-eloquent-query-cache.git && git rebase upstream/master`

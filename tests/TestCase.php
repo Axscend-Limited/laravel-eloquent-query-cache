@@ -4,6 +4,7 @@ namespace Rennokki\QueryCache\Test;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra
@@ -120,6 +121,24 @@ abstract class TestCase extends Orchestra
     protected function driverSupportsTags(): bool
     {
         return ! in_array(config('cache.default'), ['file', 'database']);
+    }
+
+    /**
+     * Count the database queries run by the callback.
+     *
+     * @param  callable  $callback
+     * @return int
+     */
+    protected function countQueries(callable $callback): int
+    {
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        $callback();
+
+        DB::disableQueryLog();
+
+        return count(DB::getQueryLog());
     }
 
     /**
