@@ -30,9 +30,10 @@ trait QueryCacheable
     {
         /** @var \Illuminate\Database\Eloquent\Model $this */
         if (isset(static::$flushCacheOnUpdate) && static::$flushCacheOnUpdate) {
-            static::observe(
+            // observe() instantiates the model, which Laravel 13 forbids mid-boot.
+            static::whenBooted(fn () => static::observe(
                 static::getFlushQueryCacheObserver()
-            );
+            ));
         }
     }
 

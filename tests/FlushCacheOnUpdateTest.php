@@ -2,6 +2,7 @@
 
 namespace Rennokki\QueryCache\Test;
 
+use Illuminate\Database\Eloquent\Model;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Rennokki\QueryCache\Test\Models\Page;
 
@@ -93,5 +94,19 @@ class FlushCacheOnUpdateTest extends TestCase
         $cache = $this->getCacheWithTags('leqc:sqlitegetselect * from "pages" limit 1a:0:{}', ['test']);
 
         $this->assertNull($cache);
+    }
+
+    public function test_model_with_flush_observer_boots_and_reboots()
+    {
+        foreach ([1, 2] as $boot) {
+            Model::clearBootedModels();
+
+            factory(Page::class)->create();
+
+            $this->assertTrue(
+                Page::getEventDispatcher()->hasListeners('eloquent.created: '.Page::class),
+                "Flush observer missing after boot {$boot}."
+            );
+        }
     }
 }
